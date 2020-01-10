@@ -8,28 +8,30 @@
 read.ncdf.arpaer <- function(con=NULL, pollutant="pm10", lev=1,
                              tz.in="UTC", tz.out="Africa/Algiers") {
   if(class(con)!="ncdf") {   ## existing file or connection
-    nc   <- open.ncdf(con)
+    nc   <- nc_open(con)
   } else {                    ## ncdf object
     nc <- con
   }
-  lon  <- get.var.ncdf(nc,varid="lon")
-  lat  <- get.var.ncdf(nc,varid="lat")
-  Time <- as.POSIXct(get.var.ncdf(nc,varid="Times"), 
+
+  lon  <- ncvar_get(nc,varid="lon")
+  lat  <- ncvar_get(nc,varid="lat")
+  Time <- as.POSIXct(ncvar_get(nc,varid="Times"),
                      format="%Y-%m-%d_%H:%M:%S", tz=tz.in)
   Time <- tz.change(x=Time,tz.in=tz.in,tz.out=tz.out)
   opts <- c(pollutant, toupper(pollutant), tolower(pollutant))
   vars <- names(nc$var)
   pp <- intersect(opts, vars)
   if(length(pp)==0) stop(paste(pollutant,"not found in",con))
-  value  <- get.var.ncdf(nc,varid=pp)
+  value  <- ncvar_get(nc,varid=pp)
   if(length(dim(value))==4) {
     value <- value[,,lev,]
   } else if (length(dim(value))!=3) {
     stop(paste(pollutant,"must have dimensions X-Y-Z-T or X-Y-T"))
   }
   if (class(con)!="ncdf") {
-    close.ncdf(nc)
+    nc_close(nc)
   }
+
   coords <- ll2utm.grid(lat,lon)
   Coords <- list(x=matrix(coords$x,nrow=nrow(lon),ncol=ncol(lon)),
                  y=matrix(coords$y,nrow=nrow(lon),ncol=ncol(lon)))

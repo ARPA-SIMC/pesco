@@ -1,6 +1,6 @@
 exportPattern("^[[:alpha:]]+")
 importFrom(caTools,runmean)
-importFrom(ncdf,open.ncdf,close.ncdf,get.var.ncdf)
+importFrom(ncdf4,nc_open,nc_close,ncvar_get)
 importFrom(fields,tim.colors,designer.colors)
 importFrom(timeDate,holiday)
 importFrom(chron,chron,seq.dates)
